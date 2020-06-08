@@ -40,11 +40,12 @@ struct string32 {
     while (sd[0])
      cs.push_back(char32(&sd));
   }
-  char32 operator[](int i) {return cs[i];}
+  int size() const {return cs.size();}
+  char32 operator[](int i) const {return cs[i];}
 };
 
 std::ostream& operator<<(std::ostream& stream, const string32& s32) {
-  for (int i=0;i<s32.cs.size();i++)
-    stream << s32.cs[i];
+  for (int i=0;i<s32.size();i++)
+    stream << s32[i];
   return stream;
 }
