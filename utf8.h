@@ -3,8 +3,6 @@
 #include <cstdio>
 #include <vector>
 
-unsigned int fetch32(char**);
-
 class char32 {
   unsigned int fetch32(char** cstr) {
     unsigned int r(0);
