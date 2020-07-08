@@ -2,10 +2,11 @@
 #include <string>
 #include <cstdio>
 #include <vector>
+#include <stdint.h>
 
 class char32 {
-  unsigned int fetch32(char** cstr) {
-    unsigned int r(0);
+  uint32_t fetch32(char** cstr) {
+    uint32_t r(0);
     int i(1);
     unsigned char compare = (unsigned char)**cstr;
     if (compare >> 3 == 0b11110) i = 4;
@@ -19,13 +20,13 @@ class char32 {
     return r;
   }
 public:
-  unsigned int c;
-  char32(unsigned int i) {c = i;}
+  uint32_t c;
+  char32(uint32_t i) {c = i;}
   char32(const char* s) {c = fetch32((char**)&s);}
   char32(char** s) {c = fetch32(s);}
   bool operator==(char* cs) {return c==fetch32(&cs);}
   bool operator==(char32 cs) {return c==cs.c;}
-  unsigned int operator>>(int a) const {return c>>a;}
+  uint32_t operator>>(int a) const {return c>>a;}
 };
 
 std::ostream& operator<<(std::ostream& stream, const char32& c32) {
