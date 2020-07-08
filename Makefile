@@ -1,2 +1,2 @@
 install:
-	cp -f utf8.h /usr/lib/utf-8.h
+	cp -f utf8.h /usr/include/utf8.h
