@@ -1,3 +1,5 @@
+// license: cc0
+
 #include <iostream>
 #include <string>
 #include <cstdio>
