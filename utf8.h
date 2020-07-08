@@ -29,10 +29,17 @@ public:
 	bool operator==(char* cs) {return c==fetch32(&cs);}
 	bool operator==(char32 cs) {return c==cs.c;}
 	uint32_t operator>>(int a) const {return c>>a;}
+	char* toChar() const {
+		return new char[4]{(char)(c>>24), (char)(c>>16), (char)(c>>8), (char)c};
+	}
 };
 
 std::ostream& operator<<(std::ostream& stream, const char32& c32) {
-	stream << (char)(c32>>24) << (char)(c32>>16) << (char)(c32>>8) << (char)c32.c;
+	char* asChar = c32.toChar();
+	for (int i(0);i<4;i++)
+		if (asChar[i])
+			stream << asChar[i];
+	delete asChar;
 	return stream;
 }
 
@@ -50,6 +57,8 @@ struct string32 {
 		for (int index(0); index < cs.size(); index++) {
 			if (cs.at(index) == find.cs.at(havematched))
 				havematched++;
+			else
+				havematched=0;
 			if (havematched == findsize) {
 				index -= findsize-1;
 				cs.erase(cs.begin()+index, cs.begin()+index+findsize);
