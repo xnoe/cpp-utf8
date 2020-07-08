@@ -63,5 +63,5 @@ struct string32 {
 std::ostream& operator<<(std::ostream& stream, const string32& s32) {
 	for (int i=0;i<s32.size();i++)
 		stream << s32[i];
-return stream;
+	return stream;
 }
