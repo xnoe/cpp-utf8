@@ -7,15 +7,16 @@
 #include <stdint.h>
 
 class char32 {
+	int size = 1;
 	uint32_t fetch32(char** cstr) {
 		uint32_t r(0);
 		if (!**cstr)
 			return r;
-		int i(1);
 		unsigned char compare = (unsigned char)**cstr;
-		if (compare >> 3 == 0b11110) i = 4;
-		if (compare >> 4 == 0b1110) i = 3;
-		if (compare >> 5 == 0b110) i = 2;
+		if (compare >> 3 == 0b11110) size = 4;
+		if (compare >> 4 == 0b1110) size = 3;
+		if (compare >> 5 == 0b110) size = 2;
+		int i = size;
 		for (;i>0;i--) {
 			r <<= 8;
 			r += (unsigned char)**cstr;
@@ -32,15 +33,17 @@ public:
 	bool operator==(char32 cs) {return c==cs.c;}
 	uint32_t operator>>(int a) const {return c>>a;}
 	char* toChar() const {
-		return new char[4]{(char)(c>>24), (char)(c>>16), (char)(c>>8), (char)c};
+		char* toReturn = new char[size];
+		int i = size;
+		for (;i>=0;i--)
+			toReturn[i] = (char)(c>>(8*i));
+		return toReturn;
 	}
 };
 
 std::ostream& operator<<(std::ostream& stream, const char32& c32) {
 	char* asChar = c32.toChar();
-	for (int i(0);i<4;i++)
-		if (asChar[i])
-			stream << asChar[i];
+	stream << asChar;
 	delete asChar;
 	return stream;
 }
