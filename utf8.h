@@ -49,23 +49,32 @@ struct string32 {
 		while (sd[0])
 			cs.push_back(char32(&sd));
 	}
-	int size() const {return cs.size();}
-	char32 operator[](int i) const {return cs[i];}
-	void replace(string32 find, string32 with) {
+	string32(std::vector<char32> c32s) {
+		cs = c32s;
+	}
+	int size() const {
+		return cs.size();
+	}
+	char32 operator[](int i) const {
+		return cs[i];
+	}
+	string32 replace(string32 find, string32 with) {
+		string32 copyOfSelf (cs);
 		int havematched(0);
 		int findsize = find.cs.size();
-		for (int index(0); index < cs.size(); index++) {
-			if (cs.at(index) == find.cs.at(havematched))
+		for (int index(0); index < copyOfSelf.cs.size(); index++) {
+			if (copyOfSelf.cs.at(index) == find.cs.at(havematched))
 				havematched++;
 			else
 				havematched=0;
 			if (havematched == findsize) {
 				index -= findsize-1;
-				cs.erase(cs.begin()+index, cs.begin()+index+findsize);
-				cs.insert(cs.begin()+index, with.cs.begin(), with.cs.end());
+				copyOfSelf.cs.erase(copyOfSelf.cs.begin()+index, copyOfSelf.cs.begin()+index+findsize);
+				copyOfSelf.cs.insert(copyOfSelf.cs.begin()+index, with.cs.begin(), with.cs.end());
 				break;
 			}
 		}
+		return copyOfSelf;
 	}
 };
 
