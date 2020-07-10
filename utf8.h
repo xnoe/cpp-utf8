@@ -9,6 +9,8 @@
 class char32 {
 	uint32_t fetch32(char** cstr) {
 		uint32_t r(0);
+		if (!**cstr)
+			return r;
 		int i(1);
 		unsigned char compare = (unsigned char)**cstr;
 		if (compare >> 3 == 0b11110) i = 4;
@@ -49,11 +51,18 @@ struct string32 {
 		while (sd[0])
 			cs.push_back(char32(&sd));
 	}
+	string32() {}
 	int size() const {
 		return cs.size();
 	}
 	char32 operator[](int i) const {
 		return cs[i];
+	}
+	void operator+=(string32 s) {
+		cs.insert(cs.end(), s.cs.begin(), s.cs.end());
+	}
+	void operator+=(char32 c) {
+		cs.push_back(c);
 	}
 	string32 replace(string32 find, string32 with) {
 		string32 copyOfSelf = *this;
@@ -72,6 +81,33 @@ struct string32 {
 			}
 		}
 		return copyOfSelf;
+	}
+
+	std::vector<string32> split(string32 delim) {
+		std::vector<string32> toReturn;
+		string32 temporary, throwaway;
+		int havematched(0);
+		int findsize = delim.cs.size();
+		for (int index(0); index < cs.size(); index++) {
+			if (cs.at(index) == delim.cs.at(havematched)) {
+				throwaway += cs[index];
+				havematched++;
+			}	else {
+				temporary += throwaway;
+				throwaway = "";
+				temporary += cs[index];
+				havematched=0;
+			}
+			if (havematched == findsize) {
+				toReturn.push_back(temporary);
+				temporary = "";
+				throwaway = "";
+				havematched = 0;
+			}
+		}
+		if (temporary.size()>0)
+			toReturn.push_back(temporary);
+		return toReturn;
 	}
 };
 
