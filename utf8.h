@@ -49,9 +49,6 @@ struct string32 {
 		while (sd[0])
 			cs.push_back(char32(&sd));
 	}
-	string32(std::vector<char32> c32s) {
-		cs = c32s;
-	}
 	int size() const {
 		return cs.size();
 	}
@@ -59,7 +56,7 @@ struct string32 {
 		return cs[i];
 	}
 	string32 replace(string32 find, string32 with) {
-		string32 copyOfSelf (cs);
+		string32 copyOfSelf = *this;
 		int havematched(0);
 		int findsize = find.cs.size();
 		for (int index(0); index < copyOfSelf.cs.size(); index++) {
