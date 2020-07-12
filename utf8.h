@@ -3,11 +3,11 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+#include <cstring>
 #include <vector>
 #include <stdint.h>
 
 class char32 {
-	int size = 1;
 	uint32_t fetch32(char** cstr) {
 		uint32_t r(0);
 		if (!**cstr)
@@ -25,12 +25,14 @@ class char32 {
 		return r;
 	}
 public:
+	int size = 1;
 	uint32_t c;
 	char32(uint32_t i) {c = i;}
 	char32(const char* s) {c = fetch32((char**)&s);}
 	char32(char** s) {c = fetch32(s);}
 	bool operator==(char* cs) {return c==fetch32(&cs);}
 	bool operator==(char32 cs) {return c==cs.c;}
+	bool operator!=(char32 cs) {return !(*this==cs);}
 	uint32_t operator>>(int a) const {return c>>a;}
 	char* toChar() const {
 		char* toReturn = new char[size];
@@ -49,24 +51,52 @@ std::ostream& operator<<(std::ostream& stream, const char32& c32) {
 }
 
 struct string32 {
+	int size = 0;
 	std::vector<char32> cs;
 	string32(char* sd) {
-		while (sd[0])
-			cs.push_back(char32(&sd));
+		while (sd[0]) {
+			char32 c32 = char32(&sd);
+			cs.push_back(c32);
+			size += c32.size;
+		}
 	}
 	string32() {}
-	int size() const {
+	int length() const {
 		return cs.size();
 	}
 	char32 operator[](int i) const {
 		return cs[i];
 	}
 	void operator+=(string32 s) {
-		cs.insert(cs.end(), s.cs.begin(), s.cs.end());
+		for (char32 c : s.cs) {
+			cs.push_back(c);
+			size += c.size;
+		}
+	}
+	void operator+=(char* s) {
+		for (char32 c : string32(s).cs) {
+			cs.push_back(c);
+			size += c.size;
+		}
 	}
 	void operator+=(char32 c) {
 		cs.push_back(c);
+		size += c.size;
 	}
+	string32 operator+(string32 s) {
+		string32 toReturn = *this;
+		toReturn += s;
+		return toReturn;
+	}
+  bool operator==(string32 s) {
+		for (int i(0);i<s.cs.size();i++)
+			if (s.cs[i]!=cs[i])
+				return false;
+		return true;
+  }
+  bool operator!=(string32 s) {
+		return !(*this==s);
+  }
 	string32 replace(string32 find, string32 with) {
 		string32 copyOfSelf = *this;
 		int havematched(0);
@@ -108,14 +138,24 @@ struct string32 {
 				havematched = 0;
 			}
 		}
-		if (temporary.size()>0)
+		if (temporary.length()>0)
 			toReturn.push_back(temporary);
+		return toReturn;
+	}
+
+	char* asChar() {
+		char* toReturn = (char*) calloc(size, 1);
+		int index = 0;
+		for (char32 c : cs) {
+			memcpy(toReturn+index, c.toChar(), c.size);
+			index += c.size;
+		}
 		return toReturn;
 	}
 };
 
 std::ostream& operator<<(std::ostream& stream, const string32& s32) {
-	for (int i=0;i<s32.size();i++)
+	for (int i=0;i<s32.length();i++)
 		stream << s32[i];
 	return stream;
 }
