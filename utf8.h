@@ -60,7 +60,18 @@ struct string32 {
 			size += c32.size;
 		}
 	}
-	string32() {}
+	string32(std::string s) {
+		char* sd = (char*)s.c_str();
+		while (sd[0]) {
+			char32 c32 = char32(&sd);
+			cs.push_back(c32);
+			size += c32.size;
+		}
+	}
+	string32() {
+//		cs.push_back(char32(""));
+//		size++;
+	}
 	int length() const {
 		return cs.size();
 	}
@@ -88,6 +99,11 @@ struct string32 {
 		toReturn += s;
 		return toReturn;
 	}
+	string32 operator+(char* s) {
+		string32 toReturn = *this;
+		toReturn += s;
+		return toReturn;
+	}
   bool operator==(string32 s) {
 		for (int i(0);i<s.cs.size();i++)
 			if (s.cs[i]!=cs[i])
@@ -105,7 +121,7 @@ struct string32 {
 			if (copyOfSelf.cs.at(index) == find.cs.at(havematched))
 				havematched++;
 			else
-				havematched=0;
+				havematched = 0;
 			if (havematched == findsize) {
 				index -= findsize-1;
 				copyOfSelf.cs.erase(copyOfSelf.cs.begin()+index, copyOfSelf.cs.begin()+index+findsize);
@@ -114,6 +130,28 @@ struct string32 {
 			}
 		}
 		return copyOfSelf;
+	}
+
+	bool replaceSelf(string32 find, string32 with) {
+		int havematched(0);
+		int findsize = find.cs.size();
+		for (int index(0); index < cs.size(); index++) {
+			if (cs.at(index) == find.cs.at(havematched))
+				havematched++;
+			else
+				havematched = 0;
+			if (havematched == findsize) {
+				index -= findsize-1;
+				cs.erase(cs.begin()+index, cs.begin()+index+findsize);
+				cs.insert(cs.begin()+index, with.cs.begin(), with.cs.end());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void replaceSelfAll(string32 find, string32 with) {
+		while (replaceSelf(find, with));
 	}
 
 	std::vector<string32> split(string32 delim) {
@@ -153,6 +191,12 @@ struct string32 {
 		return toReturn;
 	}
 };
+
+string32 operator+(char* s1, string32 s2) {
+	string32 toReturn = s1;
+	toReturn += s2;
+	return toReturn;
+}
 
 std::ostream& operator<<(std::ostream& stream, const string32& s32) {
 	for (int i=0;i<s32.length();i++)
