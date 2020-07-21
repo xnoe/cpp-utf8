@@ -53,6 +53,7 @@ std::ostream& operator<<(std::ostream& stream, const char32& c32) {
 struct string32 {
 	int size = 0;
 	std::vector<char32> cs;
+
 	string32(char* sd) {
 		while (sd[0]) {
 			char32 c32 = char32(&sd);
@@ -60,6 +61,7 @@ struct string32 {
 			size += c32.size;
 		}
 	}
+
 	string32(std::string s) {
 		char* sd = (char*)s.c_str();
 		while (sd[0]) {
@@ -68,10 +70,15 @@ struct string32 {
 			size += c32.size;
 		}
 	}
-	string32() {
-//		cs.push_back(char32(""));
-//		size++;
+
+	string32(string32 from, int start, int end) {
+		cs.insert(cs.begin(), from.cs.begin()+start, from.cs.begin()+end);
+		for (char32 c : cs)
+			size += c.size;
 	}
+
+	string32() {}
+
 	int length() const {
 		return cs.size();
 	}
@@ -99,6 +106,7 @@ struct string32 {
 		toReturn += s;
 		return toReturn;
 	}
+
 	string32 operator+(char* s) {
 		string32 toReturn = *this;
 		toReturn += s;
@@ -189,6 +197,10 @@ struct string32 {
 			index += c.size;
 		}
 		return toReturn;
+	}
+
+	int len() {
+		return cs.size();
 	}
 };
 
