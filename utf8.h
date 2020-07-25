@@ -79,6 +79,12 @@ struct string32 {
 
 	string32() {}
 
+  string32 substr(int start, int end=-1) {
+  	if (end == -1)
+  		end = cs.size();
+		return string32(*this, start, end);
+  }
+
 	int length() const {
 		return cs.size();
 	}
@@ -158,8 +164,106 @@ struct string32 {
 		return false;
 	}
 
-	void replaceSelfAll(string32 find, string32 with) {
-		while (replaceSelf(find, with));
+	void replaceSelfAll(string32 findWrapper, string32 withWrapper) {
+		while (replaceSelf(findWrapper, withWrapper));
+	}
+
+	string32 reverse() {
+		string32 tmpStr;
+		for (int i(cs.size());i>=0;i--)
+			tmpStr += cs[i];
+		return tmpStr;
+	}
+
+	bool replaceAroundSelf(string32 findWrapper, string32 withWrapper) {
+		int havematched = 0;
+		int tofind (findWrapper.cs.size());
+		int i = 0;
+    for (;i<len();i++) {
+      if (havematched == tofind)
+       	break;
+      if (cs[i] == findWrapper[havematched])
+        havematched++;
+      else
+        havematched = 0;
+    }
+
+    if (!havematched)
+      return false;
+
+    havematched--;
+    int si (i-tofind-1);
+    int ei (0);
+
+    for (;i<len();i++) {
+      if (cs[i] == findWrapper[havematched])
+        ei = i, havematched--;
+      else
+        havematched = tofind-1;
+      if (!havematched) {
+        ei -= tofind-1;
+        break;
+      }
+    }
+    string32 inner = string32(*this, si+3, ei+1);
+    inner = withWrapper + inner + withWrapper.reverse();
+    cs.erase (cs.begin()+si, cs.begin()+ei+4);
+    cs.insert(cs.begin()+si, inner.cs.begin(), inner.cs.end());
+    rebuildSize();
+		return true;
+	}
+
+	void replaceAroundSelfAll(string32 find, string32 with) {
+		while (replaceAroundSelf(find, with));
+	}
+
+	bool replaceAroundSelfAsym(string32 leftFindWrapper, string32 rightFindWrapper, string32 leftWithWrapper, string32 rightWithWrapper) {
+		int i = 0;
+
+		int havematched = 0;
+		int tofind (leftFindWrapper.cs.size());
+		for (;i<len();i++) {
+      if (havematched == tofind)
+       	break;
+      if (cs[i] == leftFindWrapper[havematched])
+        havematched++;
+      else
+        havematched = 0;
+    }
+
+    if (!havematched)
+      return false;
+
+    havematched--;
+    int si (i-tofind-1);
+    int ei (0);
+
+		havematched = 0;
+		tofind = rightFindWrapper.cs.size();
+		for (;i<len();i++) {
+      if (havematched == tofind) {
+      	ei -= tofind -1;
+       	break;
+      }
+      if (cs[i] == rightFindWrapper[havematched])
+        ei = i, havematched++;
+      else
+        havematched = 0;
+    }
+
+    if (!havematched)
+    	return false;
+
+    string32 inner = string32(*this, si+3, ei+1);
+    inner = leftWithWrapper + inner + rightWithWrapper;
+    cs.erase (cs.begin()+si, cs.begin()+ei+4);
+    cs.insert(cs.begin()+si, inner.cs.begin(), inner.cs.end());
+    rebuildSize();
+		return true;
+	}
+
+	void replaceAroundSelfAsymAll(string32 leftFind, string32 rightFind, string32 leftWith, string32 rightWith) {
+		while (replaceAroundSelfAsym(leftFind, rightFind, leftWith, rightWith));
 	}
 
 	std::vector<string32> split(string32 delim) {
@@ -201,6 +305,12 @@ struct string32 {
 
 	int len() {
 		return cs.size();
+	}
+
+	void rebuildSize() {
+		size = 0;
+		for (char32 c : cs)
+			size += c.size;
 	}
 };
 
