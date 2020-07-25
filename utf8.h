@@ -192,7 +192,7 @@ struct string32 {
       return false;
 
     havematched--;
-    int si (i-tofind-1);
+    int si (i-tofind);
     int ei (0);
 
     for (;i<len();i++) {
@@ -205,9 +205,9 @@ struct string32 {
         break;
       }
     }
-    string32 inner = string32(*this, si+3, ei+1);
+    string32 inner = string32(*this, si+tofind, ei+1);
     inner = withWrapper + inner + withWrapper.reverse();
-    cs.erase (cs.begin()+si, cs.begin()+ei+4);
+    cs.erase (cs.begin()+si, cs.begin()+ei+tofind);
     cs.insert(cs.begin()+si, inner.cs.begin(), inner.cs.end());
     rebuildSize();
 		return true;
@@ -235,14 +235,14 @@ struct string32 {
       return false;
 
     havematched--;
-    int si (i-tofind-1);
+    int si (i-tofind);
     int ei (0);
 
 		havematched = 0;
-		tofind = rightFindWrapper.cs.size();
+		int rightTofind = rightFindWrapper.cs.size();
 		for (;i<len();i++) {
-      if (havematched == tofind) {
-      	ei -= tofind -1;
+      if (havematched == rightTofind) {
+      	ei -= rightTofind -1;
        	break;
       }
       if (cs[i] == rightFindWrapper[havematched])
@@ -254,9 +254,9 @@ struct string32 {
     if (!havematched)
     	return false;
 
-    string32 inner = string32(*this, si+3, ei+1);
+    string32 inner = string32(*this, si+tofind, ei);
     inner = leftWithWrapper + inner + rightWithWrapper;
-    cs.erase (cs.begin()+si, cs.begin()+ei+4);
+    cs.erase (cs.begin()+si, cs.begin()+ei+rightTofind);
     cs.insert(cs.begin()+si, inner.cs.begin(), inner.cs.end());
     rebuildSize();
 		return true;
