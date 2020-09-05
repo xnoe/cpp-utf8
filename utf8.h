@@ -16,8 +16,11 @@ class char32 {
 		if (compare >> 3 == 0b11110) size = 4;
 		if (compare >> 4 == 0b1110) size = 3;
 		if (compare >> 5 == 0b110) size = 2;
+
 		int i = size;
+
 		for (;i>0;i--) {
+			// std::cout << **cstr;
 			r <<= 8;
 			r += (unsigned char)**cstr;
 			(*cstr)++;
@@ -27,26 +30,89 @@ class char32 {
 public:
 	int size = 1;
 	uint32_t c;
-	char32(uint32_t i) {c = i;}
 	char32(const char* s) {c = fetch32((char**)&s);}
 	char32(char** s) {c = fetch32(s);}
+	//char32() {c = 0; size = 1;}
+	char32(uint32_t s) {c = s;}
 	bool operator==(char* cs) {return c==fetch32(&cs);}
 	bool operator==(char32 cs) {return c==cs.c;}
 	bool operator!=(char32 cs) {return !(*this==cs);}
 	uint32_t operator>>(int a) const {return c>>a;}
+
 	char* toChar() const {
-		char* toReturn = new char[size];
-		int i = size;
-		for (;i>=0;i--)
-			toReturn[i] = (char)(c>>(8*i));
+		char* toReturn = (char*)calloc(size, 1);
+		for (int i=0;i<size;i++)
+			toReturn[i] = (char)(c>>(8*(size-i-1)));
+		//char* toReturn = (char*)&c;
+		return toReturn;
+	}
+
+	uint32_t asUTF32() {
+		uint32_t toReturn = 0;
+		switch (size) {
+			case (4):
+				toReturn += (c>>24) & 0b00000111;
+				toReturn <<= 6;
+				toReturn += (c>>16) & 0b00111111;
+				toReturn <<= 6;
+				toReturn += (c>>8) & 0b00111111;
+				toReturn <<= 6;
+				toReturn += (c) & 0b00111111;
+				break;
+			case (3):
+				toReturn += (c>>16) & 0b00001111;
+				toReturn <<= 6;
+				toReturn += (c>>8) & 0b00111111;
+				toReturn <<= 6;
+				toReturn += (c) & 0b00111111;
+				break;
+			case (2):
+				toReturn += (c>>8) & 0b00011111;
+				toReturn <<= 6;
+				toReturn += (c) & 0b00111111;
+				break;
+			case (1):
+				toReturn = c;
+		}
 		return toReturn;
 	}
 };
 
+char32 fromUTF32 (uint32_t utf32) {
+	char32 toReturn = char32((uint32_t)0);
+	if (utf32 <= 0x7F) {
+		toReturn.c = utf32;
+		toReturn.size = 1;
+	} else if (utf32 <=   0x07FF) {
+		toReturn.c += 0b10000000 + ((utf32)     & 0b00111111);
+		toReturn.c <<= 8;
+		toReturn.c += 0b11000000 + ((utf32>>6)  & 0b00011111);
+		toReturn.size = 2;
+	} else if (utf32 <=   0xFFFF) {
+		toReturn.c += 0b10000000 + ((char)(utf32)     & 0b00111111);
+		toReturn.c <<= 8;
+		toReturn.c += 0b10000000 + ((char)(utf32>>6)  & 0b00111111);
+		toReturn.c <<= 8;
+		toReturn.c += 0b11100000 + ((char)(utf32>>12) & 0b00001111);
+		toReturn.size = 3;
+	} else if (utf32 <= 0x10FFFF) {
+		toReturn.c += 0b10000000 + ((utf32)     & 0b00111111);
+		toReturn.c <<= 8;
+		toReturn.c += 0b10000000 + ((utf32>>6)  & 0b00111111);
+		toReturn.c <<= 8;
+		toReturn.c += 0b10000000 + ((utf32>>12) & 0b00111111);
+		toReturn.c <<= 8;
+		toReturn.c += 0b11110000 + ((utf32>>18) & 0b00000111);
+		toReturn.size = 4;
+	}
+	return toReturn;
+}
+
+
 std::ostream& operator<<(std::ostream& stream, const char32& c32) {
 	char* asChar = c32.toChar();
 	stream << asChar;
-	delete asChar;
+	free(asChar);
 	return stream;
 }
 
