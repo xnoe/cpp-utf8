@@ -10,8 +10,7 @@
 class char32 {
 	uint32_t fetch32(char** cstr) {
 		uint32_t r(0);
-		if (!**cstr)
-			return r;
+		if (!**cstr) return r;
 		unsigned char compare = (unsigned char)**cstr;
 		if (compare >> 3 == 0b11110) size = 4;
 		if (compare >> 4 == 0b1110) size = 3;
@@ -20,7 +19,6 @@ class char32 {
 		int i = size;
 
 		for (;i>0;i--) {
-			// std::cout << **cstr;
 			r <<= 8;
 			r += (unsigned char)**cstr;
 			(*cstr)++;
@@ -32,7 +30,6 @@ public:
 	uint32_t c;
 	char32(const char* s) {c = fetch32((char**)&s);}
 	char32(char** s) {c = fetch32(s);}
-	//char32() {c = 0; size = 1;}
 	char32(uint32_t s) {c = s;}
 	bool operator==(char* cs) {return c==fetch32(&cs);}
 	bool operator==(char32 cs) {return c==cs.c;}
@@ -43,7 +40,6 @@ public:
 		char* toReturn = (char*)calloc(size, 1);
 		for (int i=0;i<size;i++)
 			toReturn[i] = (char)(c>>(8*(size-i-1)));
-		//char* toReturn = (char*)&c;
 		return toReturn;
 	}
 
@@ -283,7 +279,6 @@ struct string32 {
     cs.insert(cs.begin()+si, inner.cs.begin(), inner.cs.end());
     rebuildSize();
 		return true;
-		//return false;
 	}
 
 	void replaceAroundSelfAsymAll(string32 leftFind, string32 rightFind, string32 leftWith, string32 rightWith) {
@@ -358,3 +353,4 @@ std::ostream& operator<<(std::ostream& stream, const string32& s32) {
 		stream << s32[i];
 	return stream;
 }
+
